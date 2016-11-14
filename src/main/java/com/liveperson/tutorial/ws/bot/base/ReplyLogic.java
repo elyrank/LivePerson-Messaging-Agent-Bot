@@ -10,9 +10,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public interface ReplyLogic {
-
+    /**
+     * @return The first message the bot will send
+     */
     String getHelloMessage();
+    /**
+     * @return when disconnected and came back online
+     */
     String getReconnectMessage();
+    /**
+     * This is the main logic of the bot
+     * Decide here how to react to a consumer's message
+     */
     void reply(String convId, String message, AtomicInteger reqId);
+    /**
+     * Decide if to accept or reject an incoming ring (new conversation request)
+     */
     void handleRing(String ringId, String currentConversation, String skillId, AtomicInteger reqId);
 }

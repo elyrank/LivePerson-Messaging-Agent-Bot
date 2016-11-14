@@ -70,22 +70,28 @@ public class AddressBot extends AgentBot {
     @Override
     public void reply(String convId, String response, AtomicInteger reqId) {
         if (response.equals(accept)) {
-            //address approved
-            sendMessage(convId, successMessage, reqId.incrementAndGet());
-            transfer(convId, reqId.incrementAndGet());
+            addressAccepted(convId, reqId);
         } else if (response.equals(decline)) {
             sendMessage(convId, getReconnectMessage(), reqId.incrementAndGet());
         } else {
-            //try to set address
-            final Address.Data mapData = address.getMapData(response);
-            if (mapData != null) {
-                sendMessage(convId, buildSelection("Is this the correct address?", mapData), reqId.incrementAndGet());
-            } else {
-                sendMessage(convId, errorMessage, reqId.incrementAndGet());
-            }
+            setAddress(convId, response, reqId);
         }
+    }
 
+    private void setAddress(String convId, String response, AtomicInteger reqId) {
+        //try to set address
+        final Address.Data mapData = address.getMapData(response);
+        if (mapData != null) {
+            sendMessage(convId, buildSelection("Is this the correct address?", mapData), reqId.incrementAndGet());
+        } else {
+            sendMessage(convId, errorMessage, reqId.incrementAndGet());
+        }
+    }
 
+    private void addressAccepted(String convId, AtomicInteger reqId) {
+        //address approved
+        sendMessage(convId, successMessage, reqId.incrementAndGet());
+        transfer(convId, reqId.incrementAndGet());
     }
 
     private void transfer(String convId, long reqId) {
