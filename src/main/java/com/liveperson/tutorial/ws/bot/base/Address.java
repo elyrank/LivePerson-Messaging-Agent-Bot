@@ -1,16 +1,12 @@
 package com.liveperson.tutorial.ws.bot.base;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.liveperson.tutorial.ws.util.RestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
@@ -36,10 +32,7 @@ public class Address {
             final String addressEncoded = URLEncoder.encode(address, "UTF-8");
             final String url = String.format(GOOGLE_API, addressEncoded, apiKey);
             logger.info("sending google api request: {}", url);
-            MultiValueMap<String, String> headers = new HttpHeaders();
-            headers.add(HttpHeaders.ACCEPT, "application/json");
-            final ResponseEntity<JsonNode> entity = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), JsonNode.class);
-            final JsonNode body = entity.getBody();
+            final JsonNode body = RestUtil.getJsonNode(url, restTemplate);
             if (body.get("status").asText().equals("OK")) {
                 final String formatted_address = body.findPath("formatted_address").asText();
                 final JsonNode location = body.findPath("location");
