@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -21,6 +21,8 @@ public class AgentBotMessageHandler implements JsonMessageHandler {
 
     private AgentBot agentBot;
     private WsClient wsClient;
+    private static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private Map<String, ScheduledFuture<?>> scheduledFutures = new ConcurrentHashMap<>();
 
     public AgentBotMessageHandler(AgentBot agentBot, WsClient wsClient) {
         this.agentBot = agentBot;
@@ -75,6 +77,15 @@ public class AgentBotMessageHandler implements JsonMessageHandler {
                 }
             }
         }
+        closeInactiveConversations(convId);
+    }
+
+    private void closeInactiveConversations(String convId) {
+        final ScheduledFuture<?> scheduledFuture = scheduledFutures.get(convId);
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(false);
+        }
+        scheduledFutures.put(convId, executor.schedule(() -> agentBot.resolveConversation(convId, reqId.incrementAndGet()), 10, TimeUnit.MINUTES));
     }
 
     private void handleGetUserProfile(JsonNode node) {

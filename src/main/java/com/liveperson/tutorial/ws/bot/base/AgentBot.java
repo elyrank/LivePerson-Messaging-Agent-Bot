@@ -126,7 +126,7 @@ public abstract class AgentBot implements ReplyLogic {
         return false;
     }
 
-    private void resolveConversation(String convId, int reqId) {
+    protected void resolveConversation(String convId, int reqId) {
         wsClient.send(Requests.resolveConversation(convId, reqId));
     }
 
